@@ -156,6 +156,7 @@ def prepare_config(
     codex_home: Path | None = None,
     state_dir: Path | None = None,
     chatgpt_export: Path | None = None,
+    providers: dict[str, Path] | None = None,
 ) -> Path:
     """Create or update the local opt-in configuration without installing hooks."""
     state = _directory(_local_path(state_dir or default_state_dir(), relative=True))
@@ -168,7 +169,9 @@ def prepare_config(
         vault_path = local_root(_local_path(selected_vault, relative=vault is not None))
 
     previous_home = saved.get("codex_home") or os.environ.get("CODEX_HOME") or Path.home() / ".codex"
-    home = _directory(_local_path(codex_home or previous_home, relative=codex_home is not None))
+    home = _local_path(codex_home or previous_home, relative=codex_home is not None)
+    if home.exists() or home.is_symlink():
+        home = local_root(home)
 
     selected_export = chatgpt_export if chatgpt_export is not None else saved.get("chatgpt_export")
     export = None
@@ -183,6 +186,21 @@ def prepare_config(
             _directory(export_path.parent)
         export = str(export_path)
 
+    from .providers import SUPPORTED
+
+    previous_sources = saved.get("providers", {})
+    if not isinstance(previous_sources, dict) or any(key not in SUPPORTED for key in previous_sources):
+        raise ValueError("Unrecognized saved history providers")
+    selected_sources = dict(previous_sources)
+    for provider, selected in (providers or {}).items():
+        if provider not in SUPPORTED:
+            raise ValueError(f"Unsupported history source: {provider}")
+        path = _local_path(selected, relative=True)
+        if path.is_dir():
+            local_root(path)
+        else:
+            _ordinary_file(path)
+        selected_sources[provider] = str(path)
     updated = {
         **saved,
         "vault": str(vault_path),
@@ -190,6 +208,8 @@ def prepare_config(
         "state": str(state),
         "chatgpt_export": export,
     }
+    if selected_sources or "providers" in saved:
+        updated["providers"] = selected_sources
     if updated != saved:
         _set_config(config, updated, original)
     return config

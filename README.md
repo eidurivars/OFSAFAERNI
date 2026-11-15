@@ -13,6 +13,26 @@ ofsafaerni history start
 
 Til að bæta við eigin ChatGPT-sögu geturðu gefið upp `--chatgpt-export SLÓÐ` á opinbera ZIP-skrá eða `conversations.json`. Skipunin man hvaða skrá var valin og endurles hana þegar hún er uppfærð. Codex-sagan og valinn útflutningur eru lesin á tölvunni. Fyrir spjöll sem eru eingöngu í skýinu þarf aðgang í gegnum spjallforritið eða útflutning. [Útflutningur ChatGPT-gagna](https://help.openai.com/en/articles/7260999-exporting-your-chatgpt-history-and-data)
 
+### Claude, Grok og Gemini
+
+Veldu eigin staðbundna heimild við fyrstu keyrslu. Heimildavalið helst fyrir næstu keyrslur.
+
+| Heimild | Valkostur | Stuðd gögn |
+| --- | --- | --- |
+| Claude | `--claude SLÓÐ` | Staðbundin Claude Code-saga og samhæf Claude.ai-samtalsgögn |
+| Grok | `--grok SLÓÐ` | `prod-grok-backend.json` úr Grok-útflutningi eða ZIP sem inniheldur þá skrá |
+| Gemini | `--gemini SLÓÐ` | Staðbundnar Gemini CLI-lotur á JSON- eða JSONL-sniði og enskar beiðnir í völdum Gemini Apps Takeout-skrám |
+
+```text
+ofsafaerni history start --claude /path/to/claude/source --no-integrate
+ofsafaerni history start --grok /path/to/grok-export.zip --no-integrate
+ofsafaerni history start --gemini /path/to/gemini/chats --no-integrate
+```
+
+Færnin er á Agent Skills-sniði. Notaðu færnimöppuna `.agents/skills/ofsafaerni` í verkefninu eða settu hana í `~/.claude/skills/` fyrir Claude Code og `~/.gemini/skills/` fyrir Gemini CLI. Notendur Grok geta notað staðbundnu skipunina og Obsidian. Færnin les staðbundin gögn sem notandinn velur. Í Gemini Apps Takeout eru aðeins enskar beiðnir merktar `Prompted` lesnar, þegar Gemini-heimildin er auðkennd. Bæði `history start` og `lookup` keyra á tölvunni. [Claude Code](https://code.claude.com/docs/en/skills) · [Gemini CLI](https://geminicli.com/docs/cli/skills/) · [Gemini Apps-útflutningur](https://support.google.com/gemini/answer/16920332) · [Grok-útflutningur](https://x.ai/legal/faq)
+
+Í Google Takeout skaltu velja **My Activity**, opna sniðvalið og velja JSON. Notaðu upprunalegu ZIP-skrána eða `MyActivity.json` úr `Gemini Apps`.
+
 Ræsingin prentar slóðina að staðbundinni stillingu og bætir leiðbeiningum um endurnýtingu við staðbundin notendafyrirmæli Codex þegar uppsett Codex-snið finnst. Notaðu `--no-integrate` ef þú vilt aðeins vista glósurnar. `ofsafaerni history --config SLÓÐ lookup "viðfangsefni"` finnur viðeigandi fyrri óskir. Codex metur þær í samhengi við nýjustu fyrirmæli notanda. Upprunaleg samtöl eru áfram í upprunageymslunni.
 
 | Verk | Skipun |

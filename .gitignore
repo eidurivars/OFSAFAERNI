@@ -21,3 +21,13 @@ chatgpt-export*.zip
 conversations.json
 conversations-*.json
 OFSAFAERNI - samtalslaerdomur/
+prod-grok-backend.json
+rollout-*.jsonl
+session-*.jsonl
+session-*.json
+Claude-export*.zip
+Grok-export*.zip
+takeout-*.zip
+MyActivity.json
+**/.claude/projects/
+**/.gemini/tmp/

@@ -114,7 +114,7 @@ _DIRECT = re.compile(
 )
 _ENGLISH_DIRECT = re.compile(
     r"^(?:(?:please|always|never|going forward|from now on|by default)[\s,]+)*"
-    r"(?:use|start|avoid|skip|prefer|format|record|check|keep|include|omit|show|"
+    r"(?:use|start|avoid|skip|prefer|format|record|check|keep|retain|list|compare|include|omit|show|"
     r"make|run|save|write|verify|respond|answer)\b",
     re.I,
 )

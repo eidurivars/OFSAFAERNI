@@ -19,6 +19,7 @@ import unicodedata
 from .history_rules import find_lessons
 from .history_sources import coverage, iter_codex_turns
 from .language import GENERIC_WORDS, features
+from .providers import SUPPORTED, reader_for
 from .sources import local_root
 
 _MARKER = "<!-- managed by OFSAFAERNI conversation learning -->"
@@ -30,7 +31,7 @@ _KINDS = {
 }
 _SCOPES = {"global": "almennt", "project": "verkefni", "session": "spjall"}
 _IDENTIFIER = re.compile(r"[\w:.@+-]{1,160}\Z", re.UNICODE)
-_RULE_REVISION = "rules-v2"
+_RULE_REVISION = "rules-v3"
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS seen (
@@ -75,11 +76,15 @@ def read_config(path: Path) -> dict:
     data = json.loads(raw.decode("utf-8-sig"))
     if not isinstance(data, dict):
         raise ValueError("Expected a configuration object")
+    providers = data.get("providers", {})
+    if not isinstance(providers, dict) or any(name not in SUPPORTED for name in providers):
+        raise ValueError("Unrecognized history providers")
     return {
         "codex_home": _path(data, "codex_home"),
         "vault": _path(data, "vault"),
         "state": _path(data, "state") / "history.sqlite3",
         "chatgpt_export": _path(data, "chatgpt_export", optional=True),
+        "providers": {name: _path(providers, name) for name in providers},
     }
 
 
@@ -269,33 +274,49 @@ def ingest(config: dict, records, source: str, *, indexed=(), checkpoint=None) -
 
 
 def scan(config: dict, thread_id: str | None = None) -> dict:
+    def local_scan() -> dict:
+        try:
+            return ingest(config, iter_codex_turns(config["codex_home"], thread_id=thread_id), "codex")
+        except (OSError, ValueError, sqlite3.DatabaseError) as error:
+            return {"source": "codex", "error": str(error)}
+
     if thread_id:
         # Stop fires before the terminal turn has been committed.
         time.sleep(0.8)
-    results = [ingest(config, iter_codex_turns(config["codex_home"], thread_id=thread_id), "codex")]
+    results = [local_scan()]
     if thread_id:
-        if not results[0]["new_turns"]:
+        if not results[0].get("new_turns"):
             time.sleep(1.2)
-            results.append(ingest(config, iter_codex_turns(config["codex_home"], thread_id=thread_id), "codex"))
+            results = [local_scan()]
     else:
         export = config["chatgpt_export"]
+        sources = dict(config.get("providers", {}))
         if export:
-            results.append(_scan_export(config, export))
+            sources["chatgpt"] = export
+        for name, path in sources.items():
+            try:
+                results.append(_scan_export(config, path, name))
+            except (OSError, ValueError, sqlite3.DatabaseError) as error:
+                results.append({"source": name, "error": str(error)})
     return {"results": results}
 
 
-def _scan_export(config: dict, export: Path) -> dict:
+def _scan_export(config: dict, export: Path, provider: str = "chatgpt") -> dict:
     from contextlib import closing
     from .history_sources import iter_chatgpt_export
 
+    reader = iter_chatgpt_export if provider == "chatgpt" else reader_for(provider)
+    if export.is_dir():
+        # Child files can change without changing the directory timestamp.
+        return ingest(config, reader(export), provider)
     info = export.stat()
-    identity = _digest(str(export))
+    identity = _digest(provider, str(export))
     signature = _digest(_RULE_REVISION, str(info.st_size), str(info.st_mtime_ns), str(info.st_ino))
     with closing(_open(config["state"])) as conn:
         existing = conn.execute("SELECT signature FROM export_checkpoints WHERE identity=?", (identity,)).fetchone()
     if existing and existing["signature"] == signature:
-        return {"source": "chatgpt", "unchanged": True}
-    return ingest(config, iter_chatgpt_export(export), "chatgpt", checkpoint=(identity, signature))
+        return {"source": provider, "unchanged": True}
+    return ingest(config, reader(export), provider, checkpoint=(identity, signature))
 
 
 def lookup(config: dict, query: str) -> dict:
@@ -324,6 +345,8 @@ def _parse(argv):
     start.add_argument("--codex-home", type=Path)
     start.add_argument("--state-dir", type=Path)
     start.add_argument("--chatgpt-export", type=Path)
+    for provider in SUPPORTED:
+        start.add_argument(f"--{provider}", type=Path, help=f"Include a selected local {provider} history source.")
     start.add_argument("--no-integrate", action="store_true", help="Save notes without adding Codex user guidance.")
     start.add_argument("--once", action="store_true")
     one = cmds.add_parser("scan")
@@ -347,7 +370,9 @@ def main(argv: list[str] | None = None) -> int:
             from .history_start import install_lookup_bridge, prepare_config
 
             config_path = prepare_config(vault=args.vault, codex_home=args.codex_home,
-                                         state_dir=args.state_dir, chatgpt_export=args.chatgpt_export)
+                                         state_dir=args.state_dir, chatgpt_export=args.chatgpt_export,
+                                         providers={name: getattr(args, name) for name in SUPPORTED
+                                                    if getattr(args, name) is not None})
             config = read_config(config_path)
             results = scan(config)
             integration = (
@@ -362,7 +387,7 @@ def main(argv: list[str] | None = None) -> int:
                     print(json.dumps(scan(config), ensure_ascii=True), flush=True)
                 except (OSError, ValueError, sqlite3.DatabaseError) as error:
                     print(f"OFSAFAERNI history: {error}", file=sys.stderr, flush=True)
-            return 0
+            return 2 if any("error" in result for result in results["results"]) else 0
         if args.config is None:
             raise ValueError("Use --config with the path printed by history start")
         if args.command == "hook":
@@ -398,7 +423,7 @@ def main(argv: list[str] | None = None) -> int:
                         for row in document["entries"] if isinstance(row, dict))
                 result = ingest(config, rows, "chatgpt", indexed=indexed)
         print(json.dumps(result, ensure_ascii=True))
-        return 0
+        return 2 if any("error" in entry for entry in result.get("results", [])) else 0
     except KeyboardInterrupt:
         return 0
     except (OSError, ValueError, sqlite3.DatabaseError) as error:

@@ -5,7 +5,7 @@ description: Find and assign approved skills for Icelandic or English tasks with
 
 # OFSAFAERNI
 
-Use the installed `ofsafaerni` command or `python -m ofsafaerni` in the project environment. See [the project README](../../../README.md) for installation and command arguments.
+Use the installed `ofsafaerni` command or `python -m ofsafaerni` in the project environment. See [the setup guide](https://github.com/eidurivars/OFSAFAERNI#l%C3%A6ra-sj%C3%A1lfkrafa-%C3%BAr-samt%C3%B6lum) for installation and command arguments.
 
 ## Find and use a skill
 
@@ -22,3 +22,7 @@ Use the installed `ofsafaerni` command or `python -m ofsafaerni` in the project 
 ## Learn from conversations
 
 Run `ofsafaerni history start` when the user asks to learn from their conversation history. It reads the signed-in user's available local Codex history and can include an explicitly supplied ChatGPT export. It keeps watching for local changes while running. Use `--once` for an isolated import. The command prints the path to its configuration. On later tasks where past preferences materially help, use `ofsafaerni history --config <path> lookup <short task description>`. Treat old lessons as scoped historical context and follow the current user's directions and tool permissions.
+
+When the authorized desktop chat-history tools are available and the user asks to include their ChatGPT account, follow [the app import procedure](references/chatgpt-app-history.md).
+
+Use `history start --claude <path>`, `--gemini <path>`, or `--grok <path>` to include an explicitly selected local history folder or export. Consult the setup guide for supported source formats. Save and reuse only scoped local lessons.
