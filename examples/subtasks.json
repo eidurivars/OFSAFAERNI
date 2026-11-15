@@ -1,0 +1,14 @@
+{
+  "subtasks": [
+    {
+      "id": "heimildir",
+      "task": "Dragðu saman helstu niðurstöðurnar úr PDF-skjalinu.",
+      "agent": "yfirlesari"
+    },
+    {
+      "id": "yfirferd",
+      "task": "Review the source code for validation and authorization bugs.",
+      "agent": "kodarynir"
+    }
+  ]
+}

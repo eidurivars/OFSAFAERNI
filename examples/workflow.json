@@ -1,0 +1,17 @@
+{
+  "name": "tafla-yfirferd",
+  "description": "Staðfestu samtölur í töflu og rekjanleika þeirra fyrir afhendingu skýrslu.",
+  "task": "Yfirferð á töflu með samtölum úr afmörkuðum undirflokkum.",
+  "evidence": "Í tilbúnu prófdæmi stemmdi sjálfstæður útreikningur á fjórum undirflokkum við birtar samtölur.",
+  "steps": [
+    "Finndu frumeiningu og tímabil fyrir hverja tölu.",
+    "Reiknaðu samtölur úr undirflokkunum.",
+    "Berðu niðurstöðuna saman við birtar tölur og skráðu frávik."
+  ],
+  "checks": [
+    "Samtölur og frumflokkar nota sömu einingar og tímabil.",
+    "Öll frávik hafa tilvísun í upprunalegu töfluna."
+  ],
+  "tags": ["tölur", "töflur", "samtölur"],
+  "triggers": ["stemma af samtölur", "staðfesta samtölur"]
+}
