@@ -2,6 +2,19 @@
 
 OFSAFAERNI er staðbundið færnikerfi fyrir Codex og Hermes. Það safnar `SKILL.md`-færniskrám, finnur viðeigandi færni fyrir íslenskar og enskar beiðnir og breytir staðfestu verklagi í drög að nýrri færni.
 
+## Læra sjálfkrafa úr samtölum
+
+```text
+python -m pip install "ofsafaerni[icelandic] @ git+https://github.com/eidurivars/OFSAFAERNI.git"
+ofsafaerni history start
+```
+
+`history start` les aðgengilega Codex-sögu núverandi notanda í fyrstu keyrslu og fylgist síðan með nýjum færslum á meðan skipunin keyrir. Hún finnur opið Obsidian-safn þegar eitt safn er virkt. Gefðu upp `--vault SLÓÐ` ef þú vilt velja safn beint. Skipunin geymir stuttar, heimildatengdar leiðréttingar, óskir og endurnýtanlegt verklag. Niðurstöðurnar birtast undir `07 Skills/OFSAFAERNI - samtalslaerdomur` í Obsidian.
+
+Til að bæta við eigin ChatGPT-sögu geturðu gefið upp `--chatgpt-export SLÓÐ` á opinbera ZIP-skrá eða `conversations.json`. Skipunin man hvaða skrá var valin og endurles hana þegar hún er uppfærð. Codex-sagan og valinn útflutningur eru lesin á tölvunni. Fyrir spjöll sem eru eingöngu í skýinu þarf aðgang í gegnum spjallforritið eða útflutning. [Útflutningur ChatGPT-gagna](https://help.openai.com/en/articles/7260999-exporting-your-chatgpt-history-and-data)
+
+Ræsingin prentar slóðina að staðbundinni stillingu og bætir leiðbeiningum um endurnýtingu við staðbundin notendafyrirmæli Codex þegar uppsett Codex-snið finnst. Notaðu `--no-integrate` ef þú vilt aðeins vista glósurnar. `ofsafaerni history --config SLÓÐ lookup "viðfangsefni"` finnur viðeigandi fyrri óskir. Codex metur þær í samhengi við nýjustu fyrirmæli notanda. Upprunaleg samtöl eru áfram í upprunageymslunni.
+
 | Verk | Skipun |
 | --- | --- |
 | Safna staðbundnum færniskrám eða skoða opinbert GitHub-safn | `collect` |

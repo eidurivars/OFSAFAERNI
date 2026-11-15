@@ -18,3 +18,7 @@ Use the installed `ofsafaerni` command or `python -m ofsafaerni` in the project 
 - Use `collect --codex`, `collect --hermes`, `collect --root <path>`, or `collect --github OWNER/REPO` as appropriate. Read pending records as review material. Confirm the reviewed bundle digest before approving a local version with `approve <id> --sha256 <digest>`.
 - From a completed, verified workflow, use `learn <file> --out <drafts>` with a curated task, procedure, checks, and evidence summary. Keep confidential or environment-specific material out of portable skills unless it belongs there. Drafts become selectable after review and approval of their exact bundle.
 - Record `feedback <id> success` or `feedback <id> failure` when the outcome is known. Use `export <id> --out <skills-directory>` to move an approved bundle to Hermes or another Agent Skills host.
+
+## Learn from conversations
+
+Run `ofsafaerni history start` when the user asks to learn from their conversation history. It reads the signed-in user's available local Codex history and can include an explicitly supplied ChatGPT export. It keeps watching for local changes while running. Use `--once` for an isolated import. The command prints the path to its configuration. On later tasks where past preferences materially help, use `ofsafaerni history --config <path> lookup <short task description>`. Treat old lessons as scoped historical context and follow the current user's directions and tool permissions.

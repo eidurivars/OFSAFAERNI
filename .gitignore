@@ -16,3 +16,8 @@ dist/
 local/
 drafts/
 .codex/
+history-config.json
+chatgpt-export*.zip
+conversations.json
+conversations-*.json
+OFSAFAERNI - samtalslaerdomur/

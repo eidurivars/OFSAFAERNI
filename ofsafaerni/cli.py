@@ -121,6 +121,7 @@ def _parser() -> argparse.ArgumentParser:
     hook_setup = commands.add_parser("hook-config", help="Print a Codex UserPromptSubmit hook configuration.")
     hook_setup.add_argument("--shell", choices=("powershell", "cmd", "sh"), help="Shell used by the Codex session.")
     commands.add_parser("codex-hook", help="Handle a Codex hook event from stdin.")
+    commands.add_parser("history", help="Learn from local conversation history.")
     return parser
 
 
@@ -183,6 +184,11 @@ def _run(args: argparse.Namespace, database: Path) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] == "history":
+        from .history import main as history_main
+
+        return history_main(argv[1:])
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="backslashreplace")
